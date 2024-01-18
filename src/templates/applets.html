@@ -26,12 +26,26 @@
 
 {% block content %}
 <br>
-<div class="card" style="width: 18rem;">
-    <div class="card-body">
-        <h5 class="card-title">Settings</h5>
-        <p class="card-text">Serverman settings</p>
-        <a href="/applets/settings" class="btn btn-primary">Launch</a>
-        <a href="#" class="btn btn-primary">Manage</a>
+<div class="row">
+    {% for i in applets %}
+    <div class="col col-md-3">
+        <div class="card" style="width: 18rem;">
+            <div class="card-body">
+                <h5 class="card-title">{{ i.title() }}</h5>
+                <p class="card-text">{{ applets[i] }}</p>
+                <a href="/applets/{{ i }}" class="btn btn-primary">Launch</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    <div class="col col-md-3">
+        <div class="card" style="width: 18rem;">
+            <div class="card-body">
+                <h5 class="card-title">Settings</h5>
+                <p class="card-text">Serverman settings</p>
+                <a href="/applets/settings" class="btn btn-primary">Launch</a>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

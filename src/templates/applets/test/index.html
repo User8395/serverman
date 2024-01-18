@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% set title = "Test" %}
+
+{% block title %} Test {% endblock %}
+
+{% block header %} {{ title }} {% endblock %}
+
+{% block menus %}
+
+{% if not openapplets %}
+<li><a class="dropdown-item disabled" href="">No other open apps</a></li>
+{% else %}
+
+<li><a class="dropdown-item" href="/quit/{{ title.lower() }}">Quit</a></li>
+
+{% for i in openapplets %}
+
+{% if i.title() == title %}
+{% else %}
+<li><a class="dropdown-item" href="/applets/{{ i.lower() }}">{{ i.title() }}</a></li>
+{% endif %}
+
+{% endfor %}
+
+<hr>
+<li><a class="dropdown-item" href="/applets">Applets</a></li>
+{% endif %}
+
+{% endblock %}
+
+{% block content %}
+<h1>Test Applet</h1>
+{% endblock %}

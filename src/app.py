@@ -1,3 +1,4 @@
+from json import load, dump
 from os import popen
 from flask import Flask, redirect
 from flask import render_template
@@ -8,6 +9,9 @@ if __name__ == "__main__":
     app.run(host='0.0.0.0', port=6699)
 
 openapplets = []
+
+appletsvar = load(open("applets.json"))
+software = load(open("software.json"))
 
 def checkifappletclosed(applet):
     if applet not in openapplets:
@@ -26,7 +30,10 @@ def quit(applet):
 
 @app.route("/applets")
 def applets():
-    return render_template("applets.html", openapplets=openapplets)
+    appletsdict = {}
+    for i, val in enumerate(appletsvar):
+        appletsdict[val] = load(open(f"software/{val}/info.json"))["description"]
+    return render_template("applets.html", openapplets=openapplets, applets=appletsdict)
 
 @app.route("/applets/<applet>")
 def applet(applet):
