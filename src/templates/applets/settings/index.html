@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% set title = "Settings" %}
+
+{% block title %} Settings {% endblock %}
+
+{% block header %} {{ title }} {% endblock %}
+
+{% block menus %}
+
+{% if not openapplets %}
+<li><a class="dropdown-item disabled" href="">No other open apps</a></li>
+{% else %}
+
+<li><a class="dropdown-item" href="/quit/{{ title.lower() }}">Quit</a></li>
+
+{% for i in openapplets %}
+
+{% if i.title() == title %}
+{% else %}
+<li><a class="dropdown-item" href="/applets/{{ i.lower() }}">{{ i.title() }}</a></li>
+{% endif %}
+
+{% endfor %}
+
+<hr>
+<li><a class="dropdown-item" href="/applets">Applets</a></li>
+{% endif %}
+
+{% endblock %}
+
+{% block content %}
+<h1>Settings</h1>
+<p><a href="settings/internet" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Internet</a></p>
+<p><a href="settings/about" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover"></a></p>
+{% endblock %}
