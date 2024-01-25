@@ -18,9 +18,28 @@
                         {% block header %}{% endblock %}
                     </button>
                     <ul class="dropdown-menu">
-                        {% block menus %}{% endblock %}
+                        {% if not openapplets %}
+                        <li><a class="dropdown-item disabled" href="">No other open applets</a></li>
+                        {% else %}
+
+                        <li><a class="dropdown-item" href="/quit/{{ title.lower() }}">Quit</a></li>
+
+                        {% for i in openapplets %}
+
+                        {% if i.title() == title %}
+                        {% else %}
+                        <li><a class="dropdown-item" href="/applets/{{ i.lower() }}">{{ i.title() }}</a></li>
+                        {% endif %}
+
+                        {% endfor %}
+
+                        <hr>
+                        <li><a class="dropdown-item" href="/applets">Applets</a></li>
+                        {% endif %}
+
                     </ul>
                 </li>
+                {% block menus %}{% endblock %}
             </ul>
         </div>
     </nav>

@@ -2,7 +2,7 @@
 
 {% set title = "Settings" %}
 
-{% block title %} Status {% endblock %}
+{% block title %} Manage {% endblock %}
 
 {% block header %} {{ title }} {% endblock %}
 
@@ -17,8 +17,6 @@
     <a href="/applets/settings/internet"
         class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">← Internet</a>
 </p>
-<h1>Status</h1>
-<code> {% autoescape false %} {{ ip }} {% endautoescape %} </code>
-<br />
-<p>Source: <code>ip a</code></p>
+<h1>Manage</h1>
+
 {% endblock %}

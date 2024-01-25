@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% set title = "Settings" %}
+
+{% block title %} Daemon not started {% endblock %}
+
+{% block header %} {{ title }} {% endblock %}
+
+{% block menus %}
+
+
+
+{% endblock %}
+
+{% block content %}
+<h1>Daemon not started</h1>
+<p>Make sure the Serverman daemon is installed and running</p>
+<button  class="btn btn-primary" onclick="history.back()">Ok</button>
+{% endblock %}
