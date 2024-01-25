@@ -36,4 +36,5 @@ Currently, Serverman can get system network information by using `ip a`. View it
 
 ## Credits
 Pallets Projects: for Flask, Jinja, and Werkzeug
+
 Comedic README inspired by @dnschneid
