@@ -24,6 +24,7 @@ def checkifappletclosed(applet):
     else:
         return False
 
+
 def checkifservermandstarted():
     if settings["daemon"]:
         try:
@@ -44,20 +45,24 @@ def login():
 @app.route("/setdaemonpath", methods=['POST'])
 def setdaemonpath():
     data = dict(request.form)
-    path = ""
+    daemonpath = ""
     if data["path"][-1] != "/":
-        path = data["path"] + "/"
-        print(path)
+        daemonpath = data["path"] + "/"
     else:
-        path = data["path"]
-    settings["daemon"] = path
+        daemonpath = data["path"]
+    if path.exists(daemonpath + "servermand.py") == False:
+        return redirect("/applets/settings/daemon/invalidpath/")
+    settings["daemon"] = daemonpath
     savesettings()
     return redirect("/applets/settings/daemon")
 
 @app.route("/quit/<applet>")
 def quit(applet):
-    openapplets.remove(applet)
-    return redirect("/applets")
+    try:
+        openapplets.remove(applet)
+        return redirect("/applets")
+    except ValueError:
+        return redirect("/applets")
 
 @app.route("/applets")
 def applets():
@@ -66,11 +71,10 @@ def applets():
         appletsdict[val] = load(open(f"software/{val}/info.json"))["description"]
     return render_template("applets.html", openapplets=openapplets, applets=appletsdict)
 
-@app.route("/applets/<applet>")
+@app.route("/applets/<applet>/")
 def applet(applet):
     if checkifappletclosed(applet):
         openapplets.append(applet)
-        print(openapplets)
     return render_template(f"applets/{applet}/index.html", openapplets=openapplets)
     
 @app.route("/applets/<applet>/<menu>/")
@@ -79,27 +83,39 @@ def appletmenu(applet, menu):
         return render_template("applets/settings/daemon.html", daemon=settings["daemon"])
     return render_template(f"applets/{applet}/{menu}.html", openapplets=openapplets)
 
-@app.route("/applets/<applet>/<menu>/<menu1>")
+@app.route("/applets/<applet>/<menu>/<menu1>/")
 def appletmenu1(applet, menu, menu1):
     if applet == "settings" and menu == "internet" and menu1 == "status":
-        ip = ""
+        ips = ""
         if checkifservermandstarted():
             with open(f"{settings['daemon']}servermand.input", "w") as f:
                 f.write("internet status")
-                sleep(0.5)
             with open(f"{settings['daemon']}servermand.output", "r") as f:
-                ip = f.read()
+                sleep(1)
+                ips = f.read()
+                print(ips)
         else:
             return redirect("/applets/settings/daemon/notstarted")
-        return render_template(f"applets/settings/internet-status.html", openapplets=openapplets, ip=ip)
+        return render_template(f"applets/settings/internet-status.html", openapplets=openapplets, ip=ips)
+    elif applet == "settings" and menu == "internet" and menu1 == "changeaddress":
+        ips = []
+        if checkifservermandstarted():
+            with open(f"{settings['daemon']}servermand.input", "w") as f:
+                f.write("internet addresses")
+            with open(f"{settings['daemon']}servermand.output", "r") as f:
+                sleep(1)
+                ips = f.read().split()
+        else:
+            return redirect("/applets/settings/daemon/notstarted")
+        return render_template("applets/settings/internet-changeaddress.html", openapplets=openapplets, ips=enumerate(ips))
     elif applet == "settings" and menu == "daemon" and menu1 == "setpath":
         return render_template("applets/settings/daemon-setpath.html", daemon=settings["daemon"])
     return render_template(f"applets/{applet}/{menu}-{menu1}.html", openapplets=openapplets)
 
-@app.route("/applets/<applet>/<menu>/<menu1>/<menu2>")
+@app.route("/applets/<applet>/<menu>/<menu1>/<menu2>/")
 def appletmenu2(applet, menu, menu1, menu2):
     return render_template(f"applets/{applet}/{menu}-{menu1}-{menu2}.html", openapplets=openapplets)
 
-@app.route("/applets/<applet>/<menu>/<menu1>/<menu2>/<menu3>")
+@app.route("/applets/<applet>/<menu>/<menu1>/<menu2>/<menu3>/")
 def appletmenu3(applet, menu, menu1, menu2, menu3):
     return render_template(f"applets/{applet}/{menu}-{menu1}-{menu2}-{menu3}.html", openapplets=openapplets)
