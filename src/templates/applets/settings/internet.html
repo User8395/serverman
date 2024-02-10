@@ -2,19 +2,49 @@
 
 {% set title = "Settings" %}
 
-{% block title %} Internet {% endblock %}
+{% block title %} {{ title }} {% endblock %}
 
 {% block header %} {{ title }} {% endblock %}
 
+{% set ips = literal_eval(contactdaemon("internet addresses")) %}
+
+
 {% block menus %}
-
-
-
 {% endblock %}
 
 {% block content %}
-<p><a href="/applets/settings" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">← Settings</a></p>
+<p><a href="/applets/settings"
+        class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">← Settings</a></p>
 <h1>Internet</h1>
-<p><a href="/applets/settings/internet/status" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Status</a></p>
-<p><a href="/applets/settings/internet/changeaddress" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Change IP addresses</a></p>
+<p>Select an interface to reveal its settings</p>
+
+{% for i in ips %}
+
+<p class="d-inline-flex gap-1">
+    <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#{{ i }}"
+        aria-expanded="false" aria-controls="collapseExample">
+        {{ i }}
+    </button>
+</p>
+<div class="collapse" id="{{ i }}">
+    <div class="card card-body">
+        IP address: {{ ips[i]["ip"] }}
+        <br>
+        Gateway: {{ ips[i]["gateway"] or "Not set" }}
+    </div>
+</div>
+<br>
+
+{% endfor %}
+
+{% if ips == "nopath" %}
+<script>
+    location.assign("/applets/settings/daemon/nopath/")
+</script>
+{% elif ips == "notstarted" %}
+<script>
+    console.log("deDEDE")
+    location.assign("/applets/settings/daemon/notstarted/")
+</script>
+{% endif %}
 {% endblock %}

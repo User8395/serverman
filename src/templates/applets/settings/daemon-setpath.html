@@ -2,9 +2,11 @@
 
 {% set title = "Settings" %}
 
-{% block title %} Set daemon path {% endblock %}
+{% block title %} {{ title }} {% endblock %}
 
 {% block header %} {{ title }} {% endblock %}
+
+{% set daemon = contactdaemon("daemonpath") %}
 
 {% block menus %}
 
@@ -22,23 +24,12 @@
     You can get it from <a target="_blank" href="http://github.com/User8395/servermand">here</a>.<br>
     When installed, set the path to the src folder inside the servermand folder (i.e. /path/to/servermand/src).<br>
 </p>
-{% if daemon %}
-<p>Current Path: {{ daemon }}</p>
+<p>Current Path: {{ daemon or "Not set" }}</p>
 <form action="{{ url_for('setdaemonpath')}}" method="post">
     <div class="mb-3">
-        <label for="path" class="form-label">Daemon Path</label>
+        <label for="path" class="form-label">New path</label>
         <input type="text" class="form-control" name="path" id="path" style="font-family: 'Courier New', Courier, monospace;">
     </div>
     <button type="submit" class="btn btn-primary">Set</button>
 </form>
-{% else %}
-<p>Current Path: Not set</p>
-<form action="{{ url_for('setdaemonpath')}}" method="post">
-    <div class="mb-3">
-        <label for="path" class="form-label">Daemon Path</label>
-        <input type="text" class="form-control" name="path" id="path" style="font-family: 'Courier New', Courier, monospace;">
-    </div>
-    <button type="submit" class="btn btn-primary">Set</button>
-</form>
-{% endif %}
 {% endblock %}

@@ -2,9 +2,11 @@
 
 {% set title = "Settings" %}
 
-{% block title %} Daemon {% endblock %}
+{% block title %} {{ title }} {% endblock %}
 
 {% block header %} {{ title }} {% endblock %}
+
+{% set daemon = contactdaemon("daemonpath") %}
 
 {% block menus %}
 
