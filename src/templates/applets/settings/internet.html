@@ -6,45 +6,62 @@
 
 {% block header %} {{ title }} {% endblock %}
 
-{% set ips = literal_eval(contactdaemon("internet addresses")) %}
+{% set ips = dictify(contactdaemon("internet addresses")) %}
 
 
 {% block menus %}
 {% endblock %}
 
 {% block content %}
-<p><a href="/applets/settings"
-        class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">← Settings</a></p>
-<h1>Internet</h1>
-<p>Select an interface to reveal its settings</p>
-
-{% for i in ips %}
-
-<p class="d-inline-flex gap-1">
-    <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#{{ i }}"
-        aria-expanded="false" aria-controls="collapseExample">
-        {{ i }}
-    </button>
-</p>
-<div class="collapse" id="{{ i }}">
-    <div class="card card-body">
-        IP address: {{ ips[i]["ip"] }}
-        <br>
-        Gateway: {{ ips[i]["gateway"] or "Not set" }}
-    </div>
-</div>
-<br>
-
-{% endfor %}
 
 {% if ips == "nopath" %}
+
 <script>
     location.assign("/applets/settings/daemon/nopath/")
 </script>
 {% elif ips == "notstarted" %}
 <script>
-    console.log("deDEDE")
     location.assign("/applets/settings/daemon/notstarted/")
 </script>
+
+{% else %}
+
+<p><a href="../" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">←
+        Settings</a></p>
+<h1>Internet</h1>
+
+{% if "internetchange" in rebootreasons %}
+<div class="alert alert-info" role="alert">
+    A reboot is required for the changes to take effect
+</div>
+{% endif %}
+
+<p>Select an interface to reveal its settings</p>
+
+<form action="/applyinternetsettings/" method="post">
+    {% for i in ips %}
+    <p class="d-inline-flex gap-1">
+        <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#{{ i }}"
+            aria-expanded="false" aria-controls="collapseExample">
+            {{ i }}
+        </button>
+    </p>
+    <div class="collapse" id="{{ i }}">
+        <div class="card card-body">
+            <label for="ip">IP address:&nbsp;</label>
+            <input type="text" class="form-control" name="{{ i }}.ip" placeholder="Not set" value="{{ ips[i]['ip']}}"><br>
+            <div class="input-group">&nbsp;</div>
+            <label for="gateway">Gateway:&nbsp;</label>
+            <input type="text" class="form-control" name="{{ i }}.gateway" placeholder="Not set" value="{{ ips[i]['gateway'] }}">
+        </div>
+    </div>
+    <br>
+    {% endfor %}
+    <br>
+    <button type="submit" class="btn btn-primary">
+        Apply changes
+    </button>
+</form>
+
 {% endif %}
 {% endblock %}

@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from json import load, dump
 from os import path
 from time import sleep
@@ -15,6 +17,7 @@ openapplets = []
 appletsvar = load(open("applets.json"))
 software = load(open("software.json"))
 settings = load(open("settings.json"))
+rebootreasons = []
 
 def savesettings():
     with open("settings.json", "w") as f:
@@ -51,16 +54,21 @@ def contactdaemon(command):
                 sleep(1)
                 return f.read()
         except FileNotFoundError:
-            print("dERROR")
             return "notstarted"
     elif "nopath":
         return "nopath"
     else:
         return "notstarted"
 
+def dictify(dictin):
+    try:
+        return literal_eval(dictin)
+    except ValueError or SyntaxError:
+        return "notstarted"
+
 @app.context_processor
 def globalvars():
-    return dict(openapplets=openapplets, literal_eval=literal_eval, contactdaemon=contactdaemon)
+    return dict(openapplets=openapplets, dictify=dictify, contactdaemon=contactdaemon, rebootreasons=rebootreasons)
 
 @app.route("/")
 def login():
@@ -82,6 +90,17 @@ def setdaemonpath():
     settings["daemon"] = daemonpath
     savesettings()
     return redirect("/applets/settings/daemon")
+
+@app.route("/applyinternetsettings/", methods=['POST'])
+def applyinternetsettings():
+    data = dict(request.form)
+    response = contactdaemon(f"internet set {str(data).replace(' ', '')}")
+    while response == "loading":
+        if response == "ok":
+           pass
+    global rebootreasons
+    rebootreasons.append("internetchange")
+    return redirect("/applets/settings/internet")
 
 @app.route("/quit/<applet>/")
 def quit(applet):

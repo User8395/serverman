@@ -15,14 +15,14 @@
 {% endblock %}
 
 {% block content %}
-<p><a href="/applets/settings" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">← Settings</a></p>
+<p><a href="../" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">← Settings</a></p>
 <h1>Daemon</h1>
 
 {% if daemon %}
 <p>Path: {{ daemon }}</p>
-<p><a href="/applets/settings/daemon/setpath" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Change</a></p>
+<p><a href="./setpath" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Change</a></p>
 {% else %}
 <p>Path: Not set</p>
-<p><a href="/applets/settings/daemon/setpath" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Set</a></p>
+<p><a href="./setpath" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Set</a></p>
 {% endif %}
 {% endblock %}
