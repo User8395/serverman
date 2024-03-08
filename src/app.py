@@ -63,7 +63,9 @@ def contactdaemon(command):
 def dictify(dictin):
     try:
         return literal_eval(dictin)
-    except ValueError or SyntaxError:
+    except ValueError:
+        return "notstarted"
+    except SyntaxError:
         return "notstarted"
 
 @app.context_processor
