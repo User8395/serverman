@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% set title = "Settings" %}
+
+{% block title %} {{ title }} {% endblock %}
+
+{% block header %} {{ title }} {% endblock %}
+
+
+{% block menus %}
+{% endblock %}
+
+{% block content %}
+
+<p><a href="../" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">←
+        Installed software</a></p>
+<h1>Software info</h1>
+<br>
+
+{% if getvars["software"] == "settings" %}
+
+<h2 style="display: inline;">Settings</h2>
+<br>
+<br>
+<p>Serverman settings</p>
+<p>System app</p>
+
+{% else %}
+
+
+{% set info = getsoftwareinfo(getvars["software"]) %}
+
+<h2 style="display: inline;">{{ info.name }}</h2>&nbsp;&nbsp;
+<p style="display: inline;">{% if info.version %} version {{ info.version }} {% endif %}</p>&nbsp;&nbsp;
+<a type="button" class="btn btn-light" href="/applets/{{ getvars['software'] }}">Open</a>
+<br>
+<br>
+<p>{{ info.description }}</p>
+
+{% if info.installedfrom == "system" %}
+
+<p>System app</p>
+
+{% else %}
+
+<p>Installed from: {{ info.installedfrom }}</p>
+
+{% endif %}
+
+{% endif %}
+
+{% endblock %}

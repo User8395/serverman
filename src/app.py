@@ -4,16 +4,19 @@ from json import load, dump
 from os import path
 from time import sleep
 from flask import Flask, redirect, render_template, request
+from logging import getLogger
 from ast import literal_eval
 
 app = Flask(__name__, static_folder="static")
-
+log = getLogger("werkzeug")
+log.disabled = True
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=6699)
 
 openapplets = []
 
+version = "0.0-prealpha.0"
 appletsvar = load(open("applets.json"))
 software = load(open("software.json"))
 settings = load(open("settings.json"))
@@ -67,10 +70,18 @@ def dictify(dictin):
         return "notstarted"
     except SyntaxError:
         return "notstarted"
+    
+def getsoftwareinfo(software):
+    applets = load(open(f"applets.json"))
+    info = load(open(f"software/{software}/info.json"))
+    info["installedfrom"] = load(open("software.json"))[software]
+    if software in applets:
+        info["hasapplet"] = True
+    return info
 
 @app.context_processor
 def globalvars():
-    return dict(openapplets=openapplets, dictify=dictify, contactdaemon=contactdaemon, rebootreasons=rebootreasons)
+    return dict(openapplets=openapplets, dictify=dictify, contactdaemon=contactdaemon, rebootreasons=rebootreasons, getsoftwareinfo=getsoftwareinfo, installedsoftware=software, getvars=request.args, formvars=request.form, servermanversion=version)
 
 @app.route("/")
 def login():
@@ -119,24 +130,32 @@ def applets():
         appletsdict[val] = load(open(f"software/{val}/info.json"))["description"]
     return render_template("applets.html", openapplets=openapplets, applets=appletsdict)
 
-@app.route("/applets/<applet>/")
+@app.route("/applets/<applet>/", methods=['GET', 'POST'])
 def applet(applet):
     if checkifappletclosed(applet):
         openapplets.append(applet)
     return render_template(f"applets/{applet}/index.html", openapplets=openapplets)
     
-@app.route("/applets/<applet>/<menu>/")
+@app.route("/applets/<applet>/<menu>/", methods=['GET', 'POST'])
 def appletmenu(applet, menu):
+    if checkifappletclosed(applet):
+        openapplets.append(applet)
     return render_template(f"applets/{applet}/{menu}.html", openapplets=openapplets)
 
-@app.route("/applets/<applet>/<menu>/<menu1>/")
+@app.route("/applets/<applet>/<menu>/<menu1>/", methods=['GET', 'POST'])
 def appletmenu1(applet, menu, menu1):
+    if checkifappletclosed(applet):
+        openapplets.append(applet)
     return render_template(f"applets/{applet}/{menu}-{menu1}.html", openapplets=openapplets)
 
-@app.route("/applets/<applet>/<menu>/<menu1>/<menu2>/")
+@app.route("/applets/<applet>/<menu>/<menu1>/<menu2>/", methods=['GET', 'POST'])
 def appletmenu2(applet, menu, menu1, menu2):
+    if checkifappletclosed(applet):
+        openapplets.append(applet)
     return render_template(f"applets/{applet}/{menu}-{menu1}-{menu2}.html", openapplets=openapplets)
 
-@app.route("/applets/<applet>/<menu>/<menu1>/<menu2>/<menu3>/")
+@app.route("/applets/<applet>/<menu>/<menu1>/<menu2>/<menu3>/", methods=['GET', 'POST'])
 def appletmenu3(applet, menu, menu1, menu2, menu3):
+    if checkifappletclosed(applet):
+        openapplets.append(applet)
     return render_template(f"applets/{applet}/{menu}-{menu1}-{menu2}-{menu3}.html", openapplets=openapplets)

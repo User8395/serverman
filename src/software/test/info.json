@@ -1,5 +1,6 @@
 {
     "version": "0.0.0",
+    "name": "Test applet",
     "summary": "TEST",
     "description": "A test applet for Serverman"
 }
