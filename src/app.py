@@ -3,7 +3,7 @@
 from json import load, dump
 from os import path
 from time import sleep
-from flask import Flask, redirect, render_template, request
+from flask import Flask, redirect, render_template, request, send_file
 from logging import getLogger
 from ast import literal_eval
 
@@ -134,28 +134,32 @@ def applets():
 def applet(applet):
     if checkifappletclosed(applet):
         openapplets.append(applet)
-    return render_template(f"applets/{applet}/index.html", openapplets=openapplets)
+    return render_template(f"renderapplet.html", openapplets=openapplets, applettorender=applet)
+
+@app.route("/renderapplet/<applet>/<file>")
+def renderapplet(applet, file):
+    return render_template(f"applets/{applet}/{file}.html")
     
-@app.route("/applets/<applet>/<menu>/", methods=['GET', 'POST'])
-def appletmenu(applet, menu):
-    if checkifappletclosed(applet):
-        openapplets.append(applet)
-    return render_template(f"applets/{applet}/{menu}.html", openapplets=openapplets)
+# @app.route("/applets/<applet>/<menu>/", methods=['GET', 'POST'])
+# def appletmenu(applet, menu):
+#     if checkifappletclosed(applet):
+#         openapplets.append(applet)
+#     return render_template(f"applets/{applet}/{menu}.html", openapplets=openapplets)
 
-@app.route("/applets/<applet>/<menu>/<menu1>/", methods=['GET', 'POST'])
-def appletmenu1(applet, menu, menu1):
-    if checkifappletclosed(applet):
-        openapplets.append(applet)
-    return render_template(f"applets/{applet}/{menu}-{menu1}.html", openapplets=openapplets)
+# @app.route("/applets/<applet>/<menu>/<menu1>/", methods=['GET', 'POST'])
+# def appletmenu1(applet, menu, menu1):
+#     if checkifappletclosed(applet):
+#         openapplets.append(applet)
+#     return render_template(f"applets/{applet}/{menu}-{menu1}.html", openapplets=openapplets)
 
-@app.route("/applets/<applet>/<menu>/<menu1>/<menu2>/", methods=['GET', 'POST'])
-def appletmenu2(applet, menu, menu1, menu2):
-    if checkifappletclosed(applet):
-        openapplets.append(applet)
-    return render_template(f"applets/{applet}/{menu}-{menu1}-{menu2}.html", openapplets=openapplets)
+# @app.route("/applets/<applet>/<menu>/<menu1>/<menu2>/", methods=['GET', 'POST'])
+# def appletmenu2(applet, menu, menu1, menu2):
+#     if checkifappletclosed(applet):
+#         openapplets.append(applet)
+#     return render_template(f"applets/{applet}/{menu}-{menu1}-{menu2}.html", openapplets=openapplets)
 
-@app.route("/applets/<applet>/<menu>/<menu1>/<menu2>/<menu3>/", methods=['GET', 'POST'])
-def appletmenu3(applet, menu, menu1, menu2, menu3):
-    if checkifappletclosed(applet):
-        openapplets.append(applet)
-    return render_template(f"applets/{applet}/{menu}-{menu1}-{menu2}-{menu3}.html", openapplets=openapplets)
+# @app.route("/applets/<applet>/<menu>/<menu1>/<menu2>/<menu3>/", methods=['GET', 'POST'])
+# def appletmenu3(applet, menu, menu1, menu2, menu3):
+#     if checkifappletclosed(applet):
+#         openapplets.append(applet)
+#     return render_template(f"applets/{applet}/{menu}-{menu1}-{menu2}-{menu3}.html", openapplets=openapplets)

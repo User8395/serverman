@@ -1,19 +1,10 @@
-{% extends "base.html" %}
-
-{% set title = "Settings" %}
-
-{% block title %} {{ title }} {% endblock %}
-
-{% block header %} {{ title }} {% endblock %}
+{% extends "appletbase.html" %}
 
 {% set info = dictify(contactdaemon("about")) %}
 
-{% block menus %}
-{% endblock %}
-
 {% block content %}
 
-<p><a href="../" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">←
+<p><a href="./index" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">←
         Settings</a></p>
 <h1>About</h1>
 <br>

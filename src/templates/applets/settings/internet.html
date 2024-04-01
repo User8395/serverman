@@ -1,16 +1,9 @@
-{% extends "base.html" %}
+{% extends "appletbase.html" %}
 
 {% set title = "Settings" %}
 
-{% block title %} {{ title }} {% endblock %}
-
-{% block header %} {{ title }} {% endblock %}
-
 {% set ips = dictify(contactdaemon("internet addresses")) %}
 
-
-{% block menus %}
-{% endblock %}
 
 {% block content %}
 
@@ -26,7 +19,7 @@
 
 {% else %}
 
-<p><a href="../" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">←
+<p><a href="./index" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">←
         Settings</a></p>
 <h1>Internet</h1>
 

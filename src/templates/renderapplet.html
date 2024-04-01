@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% set title = applettorender.title() %}
+
+{% block title %} {{ title }} {% endblock %}
+
+{% block header %} {{ title }} {% endblock %}
+
+
+{% block content %}
+
+{% for applet in openapplets %}
+
+{% if applet == applettorender %}
+
+<iframe src="/renderapplet/{{ applettorender }}/index" class="renderer" id="{{ applettorender }}" style="position: fixed; width: 100%; border: none; margin: 0; padding: 0; overflow: hidden; height: 100%;" frameborder="0" wmode="transparent"></iframe>
+
+{% else %}
+
+<iframe src="/renderapplet/{{ applet }}/index" class="renderer" id="{{ applet }}" style="position: fixed; width: 100%; border: none; margin: 0; padding: 0; overflow: hidden; height: 100%; display: none;" frameborder="0" wmode="transparent"></iframe>
+
+{% endif %}
+
+{% endfor %}
+
+{% endblock %}

@@ -1,10 +1,6 @@
-{% extends "base.html" %}
+{% extends "appletbase.html" %}
 
 {% set title = "Settings" %}
-
-{% block title %} {{ title }} {% endblock %}
-
-{% block header %} {{ title }} {% endblock %}
 
 
 {% block menus %}
@@ -12,7 +8,7 @@
 
 {% block content %}
 
-<p><a href="../" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">←
+<p><a href="./installedsoftware" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">←
         Installed software</a></p>
 <h1>Software info</h1>
 <br>
@@ -32,7 +28,7 @@
 
 <h2 style="display: inline;">{{ info.name }}</h2>&nbsp;&nbsp;
 <p style="display: inline;">{% if info.version %} version {{ info.version }} {% endif %}</p>&nbsp;&nbsp;
-<a type="button" class="btn btn-light" href="/applets/{{ getvars['software'] }}">Open</a>
+<a type="button" class="btn btn-light" href="/applets/{{ getvars['software'] }}" target="_parent">Open</a>
 <br>
 <br>
 <p>{{ info.description }}</p>
