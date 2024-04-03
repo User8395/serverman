@@ -32,9 +32,10 @@ If you want to try out Serverman, make sure you have Python 3 or newer and the [
 When you're done, deactivate the virtual environment by running `deactivate`.
 
 ## What can Serverman do right now?
-Currently, Serverman can change IP addresses via Linux's `ip` command.
+Change the host ip address, show system info, and install software.
+
+## There's a menu to install software from a zip file, but every zip file I use is invalid?!?!
+There's a zip file in the extra folder that you can use.
 
 ## Credits
 Pallets Projects: for Flask, Jinja, and Werkzeug
-
-Comedic README inspired by @dnschneid
