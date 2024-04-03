@@ -13,9 +13,15 @@
 <br>
 <h2 style="display: inline;">{{ name }}</h2>&nbsp;&nbsp;
 <p style="display: inline;">{% if version %} version {{ version }} {% endif %}</p>&nbsp;&nbsp;
-<a type="button" class="btn btn-light" href="/installsoftware" target="_parent">Install</a>
+<button id="confirminstall" type="button" class="btn btn-light" target="_parent">Install</button>
 <br>
 <br>
 <p>{{ description }}</p>
+
+<script>
+	$("#confirminstall").click(function() {
+		location.replace("/installsoftware")
+	})
+</script>
 
 {% endblock %}

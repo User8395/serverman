@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
-from zipfile import ZipFile
+from zipfile import ZipFile, BadZipFile
 from json import load, dump
 from os import path, mkdir, remove, listdir
-from shutil import move, copy
+from shutil import move, copy, rmtree
 from time import sleep
 from flask import Flask, redirect, render_template, request
 from logging import getLogger
@@ -121,18 +121,23 @@ def applyinternetsettings():
 @app.route("/uploadsoftware", methods=['POST'])
 def uploadfile():
     if request.method == 'POST':
+        rmtree("temp")
+        mkdir("temp")
         f = request.files["file"]
-        print(f)
         try:
             f.save("temp/softwaretoinstall.zip")
         except IsADirectoryError:
             return redirect("/renderapplet/settings/installedsoftware-notavalidfile")
-        with ZipFile("temp/softwaretoinstall.zip") as z:
-            try:
-                info = literal_eval(z.read("info.json").decode())
-                return redirect(f"/renderapplet/settings/installedsoftware-softwareinfo?name={info['name']}&version={info['version']}&summary={info['summary']}&description={info['description']}")
-            except KeyError:
-                return redirect("/renderapplet/settings/installedsoftware-notavalidfile")
+        try:
+            with ZipFile("temp/softwaretoinstall.zip") as z:
+                try:
+                    info = literal_eval(z.read("info.json").decode())
+                    return redirect(f"/renderapplet/settings/installedsoftware-softwareinfo?name={info['name']}&version={info['version']}&summary={info['summary']}&description={info['description']}")
+                except KeyError:
+                    return redirect("/renderapplet/settings/installedsoftware-notavalidfile")
+        except BadZipFile:
+            remove("temp/softwaretoinstall.zip")
+            return redirect("/renderapplet/settings/installedsoftware-notavalidfile")
     else:
         return redirect("/")
     
@@ -149,14 +154,31 @@ def installsoftware():
         move(f"temp/html/{file}", f"templates/applets/{softwarename}")
     for file in listdir("temp/"):
         move(f"temp/{file}", f"software/{softwarename}")
-    software[softwarename] = "Software Installer"
+    software[softwarename] = "Settings"
     with open("software.json", "w") as f:
         dump(software, f)
-    appletsvar.insert(softwarename)
+    appletsvar.append(softwarename)
     with open("applets.json", "w") as f:
         dump(appletsvar, f)
+    return redirect("/renderapplet/settings/installedsoftware")  
+
+@app.route("/uninstallsoftware/<softwarename>")
+def uninstallsoftware(softwarename):
+    try:
+        openapplets.remove(software)
+    except:
+        pass
+    rmtree(f"software/{softwarename}", ignore_errors=True)  
+    rmtree(f"templates/applets/{softwarename}", ignore_errors=True)
+    appletsvar.remove(softwarename)
+    with open("applets.json", "w") as f:
+        dump(appletsvar, f)
+    print(software)
+    del software[softwarename]
+    print(software)
+    with open("software.json", "w") as f:
+        dump(software, f)
     return redirect("/renderapplet/settings/installedsoftware")
-    
 
 @app.route("/quit/<applet>/")
 def quit(applet):

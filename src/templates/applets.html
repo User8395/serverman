@@ -16,7 +16,7 @@
         <div class="col col-md-3">
             <div class="card" style="width: 18rem;">
                 <div class="card-body">
-                    <h5 class="card-title">{{ i.title() }}</h5>
+                    <h5 class="card-title">{{ i.title()|replace("-", " ") }}</h5>
                     <p class="card-text">{{ applets[i] }}</p>
                     <a href="/applets/{{ i }}" class="btn btn-primary">Launch</a>
                 </div>

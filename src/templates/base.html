@@ -28,7 +28,7 @@
 
                         {% if i.title() == title %}
                         {% else %}
-                        <li><a class="dropdown-item" href="/applets/{{ i.lower() }}">{{ i.title() }}</a></li>
+                        <li><a class="dropdown-item" href="/applets/{{ i.lower() }}">{{ i.title()|replace("-", " ") }}</a></li>
                         {% endif %}
 
                         {% endfor %}

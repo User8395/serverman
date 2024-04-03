@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% set title = applettorender.title() %}
+{% set title = applettorender.title()|replace("-", " ") %}
 
 {% block title %} {{ title }} {% endblock %}
 
