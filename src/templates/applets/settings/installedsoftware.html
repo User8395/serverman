@@ -1,14 +1,13 @@
 {% extends "appletbase.html" %}
 
-{% set title = "Settings" %}
-
-
 {% block content %}
 
 <p><a href="./index" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">←
         Settings</a></p>
-<h1>Installed software</h1>
-<br>    
+<h1 style="display: inline;">Installed software&nbsp;</h1>
+<p style="display: inline;"><a href="./installedsoftware-installfromzip" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Install from zip</a></p>
+<br>
+<br>
 <div class="btn-group-vertical" role="group" aria-label="Vertical button group">
     
     {% for software in installedsoftware %}

@@ -1,0 +1,21 @@
+{% extends "appletbase.html" %}
+
+{% set name = getvars["name"] %}
+{% set version = getvars["version"] %}
+{% set summary = getvars["summary"] %}
+{% set description = getvars["description"] %}
+
+{% block content %}
+
+<p><a href="./installedsoftware-installfromzip" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">←
+        Install from zip</a></p>
+<h1>Software info</h1>
+<br>
+<h2 style="display: inline;">{{ name }}</h2>&nbsp;&nbsp;
+<p style="display: inline;">{% if version %} version {{ version }} {% endif %}</p>&nbsp;&nbsp;
+<a type="button" class="btn btn-light" href="/installsoftware" target="_parent">Install</a>
+<br>
+<br>
+<p>{{ description }}</p>
+
+{% endblock %}

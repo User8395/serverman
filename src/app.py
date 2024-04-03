@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 
+from zipfile import ZipFile
 from json import load, dump
-from os import path
+from os import path, mkdir, remove, listdir
+from shutil import move, copy
 from time import sleep
-from flask import Flask, redirect, render_template, request, send_file
+from flask import Flask, redirect, render_template, request
 from logging import getLogger
 from ast import literal_eval
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__, static_folder="static")
 log = getLogger("werkzeug")
@@ -115,6 +118,46 @@ def applyinternetsettings():
     rebootreasons.append("internetchange")
     return redirect("/applets/settings/internet")
 
+@app.route("/uploadsoftware", methods=['POST'])
+def uploadfile():
+    if request.method == 'POST':
+        f = request.files["file"]
+        print(f)
+        try:
+            f.save("temp/softwaretoinstall.zip")
+        except IsADirectoryError:
+            return redirect("/renderapplet/settings/installedsoftware-notavalidfile")
+        with ZipFile("temp/softwaretoinstall.zip") as z:
+            try:
+                info = literal_eval(z.read("info.json").decode())
+                return redirect(f"/renderapplet/settings/installedsoftware-softwareinfo?name={info['name']}&version={info['version']}&summary={info['summary']}&description={info['description']}")
+            except KeyError:
+                return redirect("/renderapplet/settings/installedsoftware-notavalidfile")
+    else:
+        return redirect("/")
+    
+@app.route("/installsoftware")
+def installsoftware():
+    global softwarename
+    with ZipFile("temp/softwaretoinstall.zip") as z:
+        softwarename = literal_eval(z.read("info.json").decode())['name'].lower().replace(" ", "-")
+        mkdir(f"software/{softwarename}")
+        mkdir(f"templates/applets/{softwarename}")
+        z.extractall("temp")
+    remove("temp/softwaretoinstall.zip")
+    for file in listdir("temp/html/"):
+        move(f"temp/html/{file}", f"templates/applets/{softwarename}")
+    for file in listdir("temp/"):
+        move(f"temp/{file}", f"software/{softwarename}")
+    software[softwarename] = "Software Installer"
+    with open("software.json", "w") as f:
+        dump(software, f)
+    appletsvar.insert(softwarename)
+    with open("applets.json", "w") as f:
+        dump(appletsvar, f)
+    return redirect("/renderapplet/settings/installedsoftware")
+    
+
 @app.route("/quit/<applet>/")
 def quit(applet):
     try:
@@ -130,13 +173,13 @@ def applets():
         appletsdict[val] = load(open(f"software/{val}/info.json"))["description"]
     return render_template("applets.html", openapplets=openapplets, applets=appletsdict)
 
-@app.route("/applets/<applet>/", methods=['GET', 'POST'])
+@app.route("/applets/<applet>/")
 def applet(applet):
     if checkifappletclosed(applet):
         openapplets.append(applet)
     return render_template(f"renderapplet.html", openapplets=openapplets, applettorender=applet)
 
-@app.route("/renderapplet/<applet>/<file>")
+@app.route("/renderapplet/<applet>/<file>", methods=['GET', 'POST'])
 def renderapplet(applet, file):
     return render_template(f"applets/{applet}/{file}.html")
     

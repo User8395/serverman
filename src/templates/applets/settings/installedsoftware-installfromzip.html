@@ -1,0 +1,19 @@
+{% extends "appletbase.html" %}
+
+{% block content %}
+
+<p><a href="./installedsoftware"
+        class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">←
+        Installed software</a></p>
+<h1 style="display: inline;">Install from zip&nbsp;</h1>
+<br>
+<div class="alert alert-warning" role="alert" style="display: none;">
+    <br>
+    No file uploaded
+</div>
+<br>
+<form action="/uploadsoftware" enctype="multipart/form-data" method="post" class="mb-3">
+    <input class="form-control" name="file" type="file" id="fileupload"><br>
+    <button type="submit" class="   btn btn-primary mb-3">Install</button>
+</form>
+{% endblock %}
