@@ -2,13 +2,14 @@
 
 from zipfile import ZipFile, BadZipFile
 from json import load, dump
-from os import path, mkdir, remove, listdir
+from os import path, mkdir, remove, listdir, rmdir
 from shutil import move, copy, rmtree
 from time import sleep
 from flask import Flask, redirect, render_template, request
 from logging import getLogger
 from ast import literal_eval
-from werkzeug.utils import secure_filename
+from pathlib import Path
+from requests import get
 
 app = Flask(__name__, static_folder="static")
 log = getLogger("werkzeug")
@@ -23,6 +24,7 @@ version = "0.0-prealpha.0"
 appletsvar = load(open("applets.json"))
 software = load(open("software.json"))
 settings = load(open("settings.json"))
+permissions = load(open("permissions.json"))
 rebootreasons = []
 
 def savesettings():
@@ -34,7 +36,6 @@ def checkifappletclosed(applet):
         return True
     else:
         return False
-
 
 def checkifservermandstarted():
     if settings["daemon"] == "":
@@ -173,7 +174,6 @@ def uninstallsoftware(softwarename):
     appletsvar.remove(softwarename)
     with open("applets.json", "w") as f:
         dump(appletsvar, f)
-    print(software)
     del software[softwarename]
     print(software)
     with open("software.json", "w") as f:
@@ -203,7 +203,57 @@ def applet(applet):
 
 @app.route("/renderapplet/<applet>/<file>", methods=['GET', 'POST'])
 def renderapplet(applet, file):
-    return render_template(f"applets/{applet}/{file}.html")
+    def createfile(filename):
+        try:
+            Path(f"software/{applet}/{filename}").touch()
+            return ""
+        except:
+            return "error"
+
+    def removefile(filename):
+        try:
+            remove(f"software/{applet}/{filename}")
+            return ""
+        except:
+            return "error"
+
+    def readfile(filename):
+        try:
+            return open(f"software/{applet}/{filename}", "r").read()
+        except:
+            return "error"
+
+    def writefile(filename, contents):
+        try:
+            open(f"software/{applet}/{filename}", "a+").write(contents)
+            return ""
+        except:
+            return "error"
+
+    def makedir(dirname):
+        try:
+            mkdir(f"software/{applet}/{dirname}")
+            return ""
+        except:
+            return "error"
+
+    def removedir(dirname):
+        try:
+            rmdir(f"software/{applet}/{dirname}")
+            return ""
+        except:
+            return "error"
+
+    def downloadfile(url, output):
+        try:
+            url= 'https://www.facebook.com/favicon.ico'
+            r = get(url, allow_redirects=True)
+            with open(f"software/{applet}/{output}", "wb") as f:
+                f.write(r.content)
+            return ""
+        except:
+            return "error"
+    return render_template(f"applets/{applet}/{file}.html", mk=createfile, rm=removefile, read=readfile, write=writefile, mkdir=makedir, rmdir=removedir, download=downloadfile)
     
 # @app.route("/applets/<applet>/<menu>/", methods=['GET', 'POST'])
 # def appletmenu(applet, menu):
