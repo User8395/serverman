@@ -20,7 +20,7 @@ If you want to try out Serverman, make sure you have Python 3 or newer and the [
 1. Clone the repo and `cd` into it: `git clone https://github.com/User8395/serverman; cd serverman`
 2. Install `python-venv`:
 	Debian/derivatives: `sudo apt install python-venv`
-	Fedora: `venv` comes with the base Python package
+	Fedora: `sudo dnf install python3`
 	Arch/derivatives: `sudo pacman -S python-venv`
 	All others: refer to your distribution's wiki
 3. Create a virtual environment: `python -m venv venv`
@@ -31,7 +31,7 @@ If you want to try out Serverman, make sure you have Python 3 or newer and the [
 
 When you're done, deactivate the virtual environment by running `deactivate`.
 
-## Known issues that make take a while to fix
+## Known issues that may take a while to fix
 `requestpermissions()` is unable to return whether the user has accepted or denied the permissions
 
 ## What can Serverman do right now?
