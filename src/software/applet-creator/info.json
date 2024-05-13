@@ -1,0 +1,6 @@
+{
+    "version": "0.0.0",
+    "name": "Applet Creator",
+    "summary": "Create applets for Serverman software",
+    "description": "Applet Creator allows you to make applets for Serverman software by taking advantage of Serverman and Jinja APIs"
+}

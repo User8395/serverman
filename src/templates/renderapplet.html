@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% set title = applettorender.title()|replace("-", " ") %}
-
+deb
 {% block title %} {{ title }} {% endblock %}
 
 {% block header %} {{ title }} {% endblock %}
@@ -9,18 +9,165 @@
 
 {% block content %}
 
-{% for applet in openapplets %}
+<div class="modal fade" id="permissionmodal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">{{ title }} is requesting the following permissions
+                </h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                    onclick="window.permissionsaccepted = false"></button>
+            </div>
+            <div class="modal-body">
+                <ul id="permissionlist"></ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                    onclick="window.permissionsaccepted = false">Decline</button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal"
+                    onclick="window.permissionsaccepted = true">Accept</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-{% if applet == applettorender %}
 
-<iframe src="/renderapplet/{{ applettorender }}/index" class="renderer" id="{{ applettorender }}" style="position: fixed; width: 100%; border: none; margin: 0; padding: 0; overflow: hidden; height: 100%;" frameborder="0" wmode="transparent"></iframe>
+<iframe src="/renderapplet/{{ applettorender }}/index" class="renderer" id="{{ applettorender }}"
+    style="position: fixed; width: 100%; border: none; margin: 0; padding: 0; overflow: hidden; height: 100%;"
+    frameborder="0" wmode="transparent"></iframe>
 
-{% else %}
+<script>
 
-<iframe src="/renderapplet/{{ applet }}/index" class="renderer" id="{{ applet }}" style="position: fixed; width: 100%; border: none; margin: 0; padding: 0; overflow: hidden; height: 100%; display: none;" frameborder="0" wmode="transparent"></iframe>
+    function uploadfile(formid) {
+        var response
+        $("#" + formid).submit(function () {
+            e.preventDefault();
+            var form = $(this);
+            var actionUrl = form.attr('action');
+            $.ajax({
+                type: "POST",
+                url: "/uploadfile/{{ applettorender }}",
+                data: form.serialize(), // serializes the form's elements.
+                success: function (responss) {
+                    response = responss
+                },
+                dataType: "text"
+            });
+        })
+    }
 
-{% endif %}
+    function createfile(filename) {
+        var response
+        $.ajax({
+            type: "POST",
+            url: "/createfile/{{ applettorender }}",
+            data: { "filename": filename },
+            success: function (responss) {
+                window.response = responss
+            },
+            dataType: "text"
+        });
+        return response
+    }
 
-{% endfor %}
+    function removefile(filename) {
+        var response
+        $.ajax({
+            type: "POST",
+            url: "/removefile/{{ applettorender }}",
+            data: { "filename": filename },
+            success: function (responss) {
+                window.response = responss
+            },
+            dataType: "text"
+        });
+        return response
+    }
+    function readfile(filename) {
+        var response
+        $.ajax({
+            type: "POST",
+            url: "/readfile/{{ applettorender }}",
+            data: { "filename": filename },
+            success: function (responss) {
+                window.response = responss
+            },
+            dataType: "text"
+        });
+        return response
+    }
+    function writefile(filename, contents) {
+        var response
+        $.ajax({
+            type: "POST",
+            url: "/writefile/{{ applettorender }}",
+            data: { "filename": filename, "contents": contents },
+            success: function (responss) {
+                window.response = responss
+            },
+            dataType: "text"
+        });
+        return response
+    }
+    function makedir(dirname) {
+        var response
+        $.ajax({
+            type: "POST",
+            url: "/makedir/{{ applettorender }}",
+            data: { "dirname": dirname },
+            success: function (responss) {
+                window.response = responss
+            },
+            dataType: "text"
+        });
+        return response
+    }
+    function removedir(dirname) {
+        var response
+        $.ajax({
+            type: "POST",
+            url: "/createfile/{{ applettorender }}",
+            data: { "dirname": dirname },
+            success: function (responss) {
+                window.response = responss
+            },
+            dataType: "text"
+        });
+        return response
+    }
+    function downloadfile(url, output) {
+        var response
+        $.ajax({
+            type: "POST",
+            url: "/downloadfile/{{ applettorender }}",
+            data: { "url": url, "output": output },
+            success: function (responss) {
+                window.response = responss
+            },
+            dataType: "text"
+        });
+        return response
+    }
+    function runcommand(command) {
+        var response
+        $.ajax({
+            type: "POST",
+            url: "/runcommand/{{ applettorender }}",
+            data: { "command": command },
+            success: function (responss) {
+                window.response = responss
+            },
+            dataType: "text"
+        });
+        return response
+    }
+    function requestpermissions(permissions) {
+        if (permissions.indexOf("command") >= 0) {
+            $("#permissionlist").append('<li title="DANGEROUS PERMISSION: Allows software to run system commands">Run system commands</li>')
+        }
+        new bootstrap.Modal($("#permissionmodal")).show()
+    }
+</script>
 
 {% endblock %}

@@ -2,22 +2,7 @@
 
 {% set title = "Settings" %}
 
-{% set ips = dictify(contactdaemon("internet addresses")) %}
-
-
 {% block content %}
-
-{% if ips == "nopath" %}
-
-<script>
-    location.assign("/applets/settings/daemon/nopath/")
-</script>
-{% elif ips == "notstarted" %}
-<script>
-    location.assign("/applets/settings/daemon/notstarted/")
-</script>
-
-{% else %}
 
 <p><a href="./index" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">←
         Settings</a></p>
@@ -56,5 +41,4 @@
     </button>
 </form>
 
-{% endif %}
 {% endblock %}

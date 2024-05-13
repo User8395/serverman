@@ -2,7 +2,7 @@
 
 from zipfile import ZipFile, BadZipFile
 from json import load, dump
-from os import path, mkdir, remove, listdir, rmdir
+from os import path, mkdir, remove, listdir, rmdir, popen
 from shutil import move, copy, rmtree
 from time import sleep
 from flask import Flask, redirect, render_template, request
@@ -27,45 +27,29 @@ settings = load(open("settings.json"))
 permissions = load(open("permissions.json"))
 rebootreasons = []
 
-def savesettings():
-    with open("settings.json", "w") as f:
-        dump(settings, f)
+def save(thing):
+    match thing:
+        case "settings":
+            with open("settings.json", "w") as f:
+                dump(settings, f)
+        case "applets":
+            with open("applets.json", "w") as f:
+                dump(appletsvar, f)
+        case "software":
+            with open("software.json", "w") as f:
+                dump(software, f)
+        case "permissions":
+            with open("permissions.json", "w") as f:
+                dump(permissions, f)
+
+def run(command: str):
+    return str(popen(command).read())
 
 def checkifappletclosed(applet):
     if applet not in openapplets:
         return True
     else:
         return False
-
-def checkifservermandstarted():
-    if settings["daemon"] == "":
-        try:
-            with open(f"{settings['daemon']}servermand.pid") as f:
-                if path.isdir(f"/proc/{f.read()}"): 
-                    return True
-                else:
-                    return False
-        except FileNotFoundError:
-            return False
-    else:
-        return "nopath"
-    
-def contactdaemon(command):
-    if command == "daemonpath":
-        return settings["daemon"]
-    if checkifservermandstarted():
-        try:
-            with open(f"{settings['daemon']}servermand.input", "w") as f:
-                f.write(command)
-            with open(f"{settings['daemon']}servermand.output", "r") as f:
-                sleep(1)
-                return f.read()
-        except FileNotFoundError:
-            return "notstarted"
-    elif "nopath":
-        return "nopath"
-    else:
-        return "notstarted"
 
 def dictify(dictin):
     try:
@@ -85,7 +69,7 @@ def getsoftwareinfo(software):
 
 @app.context_processor
 def globalvars():
-    return dict(openapplets=openapplets, dictify=dictify, contactdaemon=contactdaemon, rebootreasons=rebootreasons, getsoftwareinfo=getsoftwareinfo, installedsoftware=software, getvars=request.args, formvars=request.form, servermanversion=version)
+    return dict(rebootreasons=rebootreasons, getsoftwareinfo=getsoftwareinfo, installedsoftware=software, getvars=request.args, formvars=request.form, servermanversion=version)
 
 @app.route("/")
 def login():
@@ -105,22 +89,27 @@ def setdaemonpath():
     if path.exists(daemonpath + "servermand.py") == False:
         return redirect("/applets/settings/daemon/invalidpath/")
     settings["daemon"] = daemonpath
-    savesettings()
+    save("software")
     return redirect("/applets/settings/daemon")
 
 @app.route("/applyinternetsettings/", methods=['POST'])
 def applyinternetsettings():
-    data = dict(request.form)
-    response = contactdaemon(f"internet set {str(data).replace(' ', '')}")
-    while response == "loading":
-        if response == "ok":
-           pass
-    global rebootreasons
-    rebootreasons.append("internetchange")
-    return redirect("/applets/settings/internet")
+    newips = dict(request.form)
+    for ip in newips:
+        ip = ip.replace(".", " ").split()
+        thingtoset = ip[1]
+        interface = ip[0]
+        ip = newips[".".join(ip)]
+        if thingtoset == "ip":
+            run(f"ip addr replace {ip}/24 dev {interface}")
+        elif thingtoset == "gateway":
+            oldgateway = run(f'ip route show 0.0.0.0/0 dev {interface} | cut -d " " -f3').replace('\n', '')
+            run(f"ip route delete default via {oldgateway}")
+            run(f"ip route add default via {ip} dev {interface}")
+    return redirect("/renderapplet/settings/internet")
 
 @app.route("/uploadsoftware", methods=['POST'])
-def uploadfile():
+def uploadsoftware():
     if request.method == 'POST':
         rmtree("temp")
         mkdir("temp")
@@ -156,11 +145,11 @@ def installsoftware():
     for file in listdir("temp/"):
         move(f"temp/{file}", f"software/{softwarename}")
     software[softwarename] = "Settings"
-    with open("software.json", "w") as f:
-        dump(software, f)
+    save("software")
     appletsvar.append(softwarename)
-    with open("applets.json", "w") as f:
-        dump(appletsvar, f)
+    save("applets")
+    permissions[softwarename] = []
+    save("permissions")
     return redirect("/renderapplet/settings/installedsoftware")  
 
 @app.route("/uninstallsoftware/<softwarename>")
@@ -172,12 +161,9 @@ def uninstallsoftware(softwarename):
     rmtree(f"software/{softwarename}", ignore_errors=True)  
     rmtree(f"templates/applets/{softwarename}", ignore_errors=True)
     appletsvar.remove(softwarename)
-    with open("applets.json", "w") as f:
-        dump(appletsvar, f)
+    save("applets")
     del software[softwarename]
-    print(software)
-    with open("software.json", "w") as f:
-        dump(software, f)
+    save("software")
     return redirect("/renderapplet/settings/installedsoftware")
 
 @app.route("/quit/<applet>/")
@@ -185,76 +171,124 @@ def quit(applet):
     try:
         openapplets.remove(applet)
         return redirect("/applets")
-    except ValueError:
+    except:
         return redirect("/applets")
+
+@app.route("/uploadfile/<applet>", methods=["POST"])
+def uploadfile():
+    return
+
+@app.route("/createfile/<applet>/", methods=["POST"])
+def createfile(applet):
+    try:
+        Path(f"software/{applet}/{request.form.get("filename")}").touch()
+        return "success"
+    except:
+        return "unknown error"
+    
+@app.route("/removefile/<applet>/", methods=["POST"])
+def removefile(applet):
+    try:
+        remove(f"software/{applet}/{request.form.get("filename")}")
+        return "success"
+    except:
+        return "unknown error"
+    
+@app.route("/readfile/<applet>/", methods=["POST"])
+def readfile(applet):
+    try:
+        return open(f"software/{applet}/{request.form.get("filename")}", "r").read()
+    except FileNotFoundError:
+        return "file not found"
+    except:
+        return "unknown error"
+    
+@app.route("/writefile/<applet>/", methods=["POST"])
+def writefile(applet):
+    try:
+        open(f"software/{applet}/{request.form.get("filename")}", "a+").write(request.form.get("contents"))
+        return "success"
+    except:
+        return "unknown error"
+
+@app.route("/makedir/<applet>/", methods=["POST"])
+def makedir(applet):
+    try:
+        mkdir(f"software/{applet}/{request.form.get("dirname")}")
+        return "success"
+    except:
+        return "unknown error"
+
+@app.route("/removedir/<applet>/", methods=["POST"])
+def removedir(applet):
+    try:
+        rmdir(f"software/{applet}/{request.form.get("dirname")}")
+        return "success"
+    except:
+        return "unknown error"
+
+@app.route("/downloadfile/<applet>/", methods=["POST"])
+def downloadfile(applet):
+    try:
+        r = get(request.form.get("url"), allow_redirects=True)
+        with open(f"software/{applet}/{request.form.get("output")}", "wb") as f:
+            f.write(r.content)
+        return "done"
+    except:
+        return "unknown error"
+
+@app.route("/runcommand/<applet>/", methods=["POST"])
+def runcommand(applet):
+    try:
+        if "commands" in permissions[applet]:
+            return run(request.form.get("command"))
+        else:
+            return "permission denied"
+    except:
+        return "unknown error"
+
 
 @app.route("/applets/")
 def applets():
     appletsdict = {}
     for i, val in enumerate(appletsvar):
-        appletsdict[val] = load(open(f"software/{val}/info.json"))["description"]
+        appletsdict[val] = load(open(f"software/{val}/info.json"))["summary"]
     return render_template("applets.html", openapplets=openapplets, applets=appletsdict)
 
 @app.route("/applets/<applet>/")
 def applet(applet):
     if checkifappletclosed(applet):
         openapplets.append(applet)
-    return render_template(f"renderapplet.html", openapplets=openapplets, applettorender=applet)
+    return render_template(f"renderapplet.html", openapplets=openapplets, applettorender=applet, appletperms=permissions[applet])
 
 @app.route("/renderapplet/<applet>/<file>", methods=['GET', 'POST'])
 def renderapplet(applet, file):
-    def createfile(filename):
-        try:
-            Path(f"software/{applet}/{filename}").touch()
-            return ""
-        except:
-            return "error"
+    if checkifappletclosed(applet):
+        openapplets.append(applet)
+    return render_template(f"applets/{applet}/{file}.html") 
 
-    def removefile(filename):
-        try:
-            remove(f"software/{applet}/{filename}")
-            return ""
-        except:
-            return "error"
+@app.route("/renderapplet/settings/internet")
+def internet():
+    ifs = run("ls /sys/class/net/").split()
+    ips = {}
+    for interface in ifs:
+        ip = run(f"ip -f inet addr show {interface} | sed -En -e 's/.*inet ([0-9.]+).*/\\1/p'").replace("\n", "")
+        gateway = run(f"ip route show 0.0.0.0/0 dev {interface} | cut -d " " -f3").replace("\n", "")
+        if ip != "" and interface != "lo":
+            ips[f"{interface}"] = {"ip": ip, "gateway": gateway}
+    return render_template("applets/settings/internet.html", ips=ips)
 
-    def readfile(filename):
-        try:
-            return open(f"software/{applet}/{filename}", "r").read()
-        except:
-            return "error"
+@app.route("/renderapplet/settings/about")
+def about():
+    hostinfo = literal_eval(run("hostnamectl --json=short").replace('null', "None"))
+    info = dict()
+    info["servermand"] = version
+    info["os"] = hostinfo["OperatingSystemPrettyName"]
+    info["kernel"] = hostinfo['KernelName'] + " " + hostinfo['KernelRelease'] + " " + hostinfo['KernelVersion']
+    info["hardware"] = hostinfo["HardwareVendor"] + " " + hostinfo["HardwareModel"]
+    info["firmware"] = hostinfo["FirmwareVendor"] + " " + hostinfo["FirmwareVersion"]
+    return render_template("applets/settings/about.html", info=info)
 
-    def writefile(filename, contents):
-        try:
-            open(f"software/{applet}/{filename}", "a+").write(contents)
-            return ""
-        except:
-            return "error"
-
-    def makedir(dirname):
-        try:
-            mkdir(f"software/{applet}/{dirname}")
-            return ""
-        except:
-            return "error"
-
-    def removedir(dirname):
-        try:
-            rmdir(f"software/{applet}/{dirname}")
-            return ""
-        except:
-            return "error"
-
-    def downloadfile(url, output):
-        try:
-            url= 'https://www.facebook.com/favicon.ico'
-            r = get(url, allow_redirects=True)
-            with open(f"software/{applet}/{output}", "wb") as f:
-                f.write(r.content)
-            return ""
-        except:
-            return "error"
-    return render_template(f"applets/{applet}/{file}.html", mk=createfile, rm=removefile, read=readfile, write=writefile, mkdir=makedir, rmdir=removedir, download=downloadfile)
-    
 # @app.route("/applets/<applet>/<menu>/", methods=['GET', 'POST'])
 # def appletmenu(applet, menu):
 #     if checkifappletclosed(applet):

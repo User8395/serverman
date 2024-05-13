@@ -1,0 +1,66 @@
+<head>
+	<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+	<script type="importmap">
+      {
+        "imports": {
+          "@material/web/": "https://esm.run/@material/web/"
+        }
+      }
+    </script>
+	<script type="module">
+		import '@material/web/all.js';
+		import { styles as typescaleStyles } from '@material/web/typography/md-typescale-styles.js';
+
+		document.adoptedStyleSheets.push(typescaleStyles.styleSheet);
+	</script>
+</head>
+
+<body>
+	<div style="position: absolute; top: 36%; left: 46%;" class="menu" id="appletlist">
+		<md-filled-button onclick="switchmenu('newapplet')">New Applet</md-filled-button>
+	</div>
+	
+	<div class="menu" id="newapplet">
+		<form action="" id="newapplet-newappletform">
+			<h1 class="md-typescale-display-medium">New Applet</h1>
+			<md-outlined-text-field id="newapplet-softwarename" label="Software name" supporting-text="The name that will appear in the navigation bar above"></md-outlined-text-field>
+			<br>
+			<br>
+			<md-filled-button onclick="switchmenu('createapplet'); startappletcreate()">Create</md-filled-button>
+		</form>
+	</div>
+
+	<div style="position: absolute; top: 30%; left: 42%;" class="menu" id="createapplet">
+		<h1 style="text-align: center; vertical-align: center;" class="md-typescale-display-medium" id="createapplet-heading"></h1>
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		<md-circular-progress indeterminate></md-circular-progress>
+	</div>
+
+	<script>
+		console.log(parent.runcommand("hello"))
+		document.querySelectorAll(".menu").forEach(function (menu) {
+			menu.style.display = "none"
+		})
+		document.getElementById("appletlist").style.display = "block"
+		function switchmenu(menu) {
+			document.querySelectorAll(".menu").forEach(function (menu) {
+				menu.style.display = "none"
+			})
+			document.getElementById(menu).style.display = "block"
+		}
+		document.getElementById("newapplet-newappletform").addEventListener("submit", function(e) {
+			e.preventDefault()
+		})
+		function startappletcreate() {
+			var heading = document.getElementById("createapplet-heading")
+			heading.textContent = "Generating applet files"
+			// createfile("index.html")
+			setTimeout(function() {
+				heading.textContent = "Compressing applet"
+			}, 2000)
+			setTimeout(function() {
+				heading.textContent = "Installing software"
+			}, 4000)
+		}
+	</script>
+</body>
