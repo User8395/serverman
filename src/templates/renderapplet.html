@@ -17,16 +17,16 @@ deb
                 <h1 class="modal-title fs-5" id="exampleModalLabel">{{ title }} is requesting the following permissions
                 </h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-                    onclick="window.permissionsaccepted = false"></button>
+                    onclick="window.permissionsgranted = false"></button>
             </div>
             <div class="modal-body">
                 <ul id="permissionlist"></ul>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
-                    onclick="window.permissionsaccepted = false">Decline</button>
+                    onclick="window.permissionsgranted = false">Decline</button>
                 <button type="button" class="btn btn-primary" data-bs-dismiss="modal"
-                    onclick="window.permissionsaccepted = true">Accept</button>
+                    onclick="window.permissionsgranted = true">Grant</button>
             </div>
         </div>
     </div>
@@ -58,109 +58,93 @@ deb
     }
 
     function createfile(filename) {
-        var response
         $.ajax({
             type: "POST",
             url: "/createfile/{{ applettorender }}",
             data: { "filename": filename },
-            success: function (responss) {
-                window.response = responss
+            success: function (response) {
+                window.response = response
             },
             dataType: "text"
         });
-        return response
     }
 
     function removefile(filename) {
-        var response
         $.ajax({
             type: "POST",
             url: "/removefile/{{ applettorender }}",
             data: { "filename": filename },
-            success: function (responss) {
-                window.response = responss
+            success: function (response) {
+                window.response = response
             },
             dataType: "text"
         });
-        return response
     }
     function readfile(filename) {
-        var response
         $.ajax({
             type: "POST",
             url: "/readfile/{{ applettorender }}",
             data: { "filename": filename },
-            success: function (responss) {
-                window.response = responss
+            success: function (response) {
+                window.response = response
             },
             dataType: "text"
         });
-        return response
     }
     function writefile(filename, contents) {
-        var response
         $.ajax({
             type: "POST",
             url: "/writefile/{{ applettorender }}",
             data: { "filename": filename, "contents": contents },
-            success: function (responss) {
-                window.response = responss
+            success: function (response) {
+                window.response = response
             },
             dataType: "text"
         });
-        return response
     }
     function makedir(dirname) {
-        var response
         $.ajax({
             type: "POST",
             url: "/makedir/{{ applettorender }}",
             data: { "dirname": dirname },
-            success: function (responss) {
-                window.response = responss
+            success: function (response) {
+                window.response = response
             },
             dataType: "text"
         });
-        return response
     }
     function removedir(dirname) {
-        var response
         $.ajax({
             type: "POST",
             url: "/createfile/{{ applettorender }}",
             data: { "dirname": dirname },
-            success: function (responss) {
-                window.response = responss
+            success: function (response) {
+                window.response = response
             },
             dataType: "text"
         });
-        return response
     }
     function downloadfile(url, output) {
-        var response
         $.ajax({
             type: "POST",
             url: "/downloadfile/{{ applettorender }}",
             data: { "url": url, "output": output },
-            success: function (responss) {
-                window.response = responss
+            success: function (response) {
+                window.response = response
             },
             dataType: "text"
         });
-        return response
     }
     function runcommand(command) {
-        var response
         $.ajax({
             type: "POST",
             url: "/runcommand/{{ applettorender }}",
             data: { "command": command },
-            success: function (responss) {
-                window.response = responss
+            success: function (response) {
+                window.response = response
             },
             dataType: "text"
         });
-        return response
     }
     function requestpermissions(permissions) {
         if (permissions.indexOf("command") >= 0) {

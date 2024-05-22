@@ -5,7 +5,7 @@ from json import load, dump
 from os import path, mkdir, remove, listdir, rmdir, popen
 from shutil import move, copy, rmtree
 from time import sleep
-from flask import Flask, redirect, render_template, request
+from flask import Flask, redirect, render_template, request, send_from_directory
 from logging import getLogger
 from ast import literal_eval
 from pathlib import Path
@@ -74,23 +74,6 @@ def globalvars():
 @app.route("/")
 def login():
     return redirect("/applets/")
-
-@app.route("/setdaemonpath/", methods=['POST'])
-def setdaemonpath():
-    data = dict(request.form)
-    daemonpath = ""
-    try:
-        if data["path"][-1] != "/":
-            daemonpath = data["path"] + "/"
-        else:
-            daemonpath = data["path"]
-    except IndexError:
-        pass
-    if path.exists(daemonpath + "servermand.py") == False:
-        return redirect("/applets/settings/daemon/invalidpath/")
-    settings["daemon"] = daemonpath
-    save("software")
-    return redirect("/applets/settings/daemon")
 
 @app.route("/applyinternetsettings/", methods=['POST'])
 def applyinternetsettings():
