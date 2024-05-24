@@ -33,14 +33,36 @@
 </div>
 
 
+<div class="modal fade" id="softwareinstallmodal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Install software?</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                    onclick="window.permissionsgranted = false"></button>
+            </div>
+            <div class="modal-body">
+                <h1 id="name" style="display: inline;"></h1>
+                <p id="version" style="display: inline;"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                    onclick="window.permissionsgranted = false">Decline</button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal"
+                    onclick="grantpermissions()">Grant</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <iframe src="/renderapplet/{{ applettorender }}/index" class="renderer" id="{{ applettorender }}"
     style="position: fixed; width: 100%; border: none; margin: 0; padding: 0; overflow: hidden; height: 100%;"
     frameborder="0" wmode="transparent"></iframe>
 
 <script>
     var appletperms = JSON.parse(JSON.stringify("{% autoescape false %}{{ appletperms }}{% endautoescape %}"))
-
-    
 
     function uploadfile(formid) {
         var response
@@ -149,12 +171,32 @@
             dataType: "text"
         });
     }
+
+    function requestsoftwareinstall(path) {
+        $.ajax({
+            type: "POST",
+            url: "/requestsoftwareinstall/{{ applettorender }}",
+            data: { "path": path },
+            success: function(response) {
+                
+            },
+            dataType: "json"
+        })
+    }
+
     function requestpermissions(requestedperms) {
         window.requestedperms = requestedperms
-        if (requestedperms.indexOf("command") >= 0 && appletperms.indexOf("command")) {
+        if (requestedperms.indexOf("command") >= 0 && appletperms.indexOf("command") == 0) {
             $("#permissionlist").append('<li title="DANGEROUS PERMISSION: Allows software to run system commands">Run system commands</li>')
         }
-        new bootstrap.Modal($("#permissionmodal")).show()
+        if (requestedperms.indexOf("software") >= 0 && appletperms.indexOf("software") == 0) {
+            $("#permissionlist").append('<li title="Allows the software to request Serverman to install another software from the local storage">Request software install</li>')
+        }
+        if ($("#permissionlist").is(":empty")) {
+            window.permissionsgranted = true
+        } else {
+            new bootstrap.Modal($("#permissionmodal")).show()
+        }
         
     }
     function grantpermissions() {

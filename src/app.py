@@ -237,6 +237,27 @@ def grantpermissions(applet):
     save("permissions")
     return "ok"
 
+@app.route("/requestsoftwareinstall/<applet>")
+def requestsoftwareinstall(applet):
+    try:
+        if "software" in permissions[applet]:
+            copy(f"software/{applet}/{request.form.get("path")}", "temp/softwaretoinstall.zip")
+            try:
+                with ZipFile("temp/softwaretoinstall.zip") as z:
+                    try:
+                        info = literal_eval(z.read("info.json").decode())
+                        return {"name": info["name"], "version": info["version"], "summary": info["summary"], "description": info["description"]}
+                    except KeyError:
+                        remove("temp/softwaretoinstall.zip")
+                        return "invalid file"
+            except BadZipFile:
+                remove("temp/softwaretoinstall.zip")
+                return "invalid file"
+        else:
+            return "permission denied"
+    except:
+        "unknown error"
+
 @app.route("/applets/")
 def applets():
     appletsdict = {}

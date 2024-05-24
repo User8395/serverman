@@ -39,23 +39,18 @@
 	</div>
 
 	<script>
-		parent.runcommand("echo")
-		setTimeout(function() {
-			if (parent.window.response == "permission denied") {
-				parent.requestpermissions(["command"])
-				switchmenu("waitperms")
-				function checkifpermsgranted() {
-					if (parent.window.permissionsgranted != true) {
-						setTimeout(function() {
-							checkifpermsgranted()
-						}, 100)
-					} else {
-						switchmenu("appletlist")
-					}
-				}
-				checkifpermsgranted()
+		parent.requestpermissions(["command", "software"])
+		switchmenu("waitperms")
+		function checkifpermsgranted() {
+			if (parent.window.permissionsgranted != true) {
+				setTimeout(function() {
+					checkifpermsgranted()
+				}, 100)
+			} else {
+				switchmenu("appletlist")
 			}
-		}, 200)
+		}
+		checkifpermsgranted()
 		document.querySelectorAll(".menu").forEach(function (menu) {
 			menu.style.display = "none"
 		})
