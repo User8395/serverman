@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% set title = applettorender.title()|replace("-", " ") %}
-deb
+
 {% block title %} {{ title }} {% endblock %}
 
 {% block header %} {{ title }} {% endblock %}
@@ -26,7 +26,7 @@ deb
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
                     onclick="window.permissionsgranted = false">Decline</button>
                 <button type="button" class="btn btn-primary" data-bs-dismiss="modal"
-                    onclick="window.permissionsgranted = true">Grant</button>
+                    onclick="grantpermissions()">Grant</button>
             </div>
         </div>
     </div>
@@ -38,6 +38,9 @@ deb
     frameborder="0" wmode="transparent"></iframe>
 
 <script>
+    var appletperms = JSON.parse(JSON.stringify("{% autoescape false %}{{ appletperms }}{% endautoescape %}"))
+
+    
 
     function uploadfile(formid) {
         var response
@@ -146,11 +149,23 @@ deb
             dataType: "text"
         });
     }
-    function requestpermissions(permissions) {
-        if (permissions.indexOf("command") >= 0) {
+    function requestpermissions(requestedperms) {
+        window.requestedperms = requestedperms
+        if (requestedperms.indexOf("command") >= 0 && appletperms.indexOf("command")) {
             $("#permissionlist").append('<li title="DANGEROUS PERMISSION: Allows software to run system commands">Run system commands</li>')
         }
         new bootstrap.Modal($("#permissionmodal")).show()
+        
+    }
+    function grantpermissions() {
+        window.permissionsgranted = true
+        console.log(window.requestedperms)
+        $.ajax({
+            type: "POST",
+            url: "/grantpermissions/{{ applettorender }}",
+            data: { "permissions": window.requestedperms.join(" ") },
+            dataType: "text"
+        })
     }
 </script>
 

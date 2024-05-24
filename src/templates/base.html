@@ -26,7 +26,7 @@
 
                         {% for i in openapplets %}
 
-                        {% if i.title() == title %}
+                        {% if i.title()|replace("-", " ") == title %}
                         {% else %}
                         <li><a class="dropdown-item" href="/applets/{{ i.lower() }}">{{ i.title()|replace("-", " ") }}</a></li>
                         {% endif %}

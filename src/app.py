@@ -5,7 +5,7 @@ from json import load, dump
 from os import path, mkdir, remove, listdir, rmdir, popen
 from shutil import move, copy, rmtree
 from time import sleep
-from flask import Flask, redirect, render_template, request, send_from_directory
+from flask import Flask, redirect, render_template, request
 from logging import getLogger
 from ast import literal_eval
 from pathlib import Path
@@ -223,13 +223,19 @@ def downloadfile(applet):
 @app.route("/runcommand/<applet>/", methods=["POST"])
 def runcommand(applet):
     try:
-        if "commands" in permissions[applet]:
+        if "command" in permissions[applet]:
             return run(request.form.get("command"))
         else:
             return "permission denied"
     except:
         return "unknown error"
 
+@app.route("/grantpermissions/<applet>", methods=["POST"])
+def grantpermissions(applet):
+    for i in request.form.get("permissions").split(" "):
+        permissions[applet].append(i)
+    save("permissions")
+    return "ok"
 
 @app.route("/applets/")
 def applets():

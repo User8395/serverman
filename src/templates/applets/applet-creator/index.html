@@ -43,12 +43,19 @@
 		setTimeout(function() {
 			if (parent.window.response == "permission denied") {
 				parent.requestpermissions(["command"])
-				do {
-					switchmenu("waitperms")
+				switchmenu("waitperms")
+				function checkifpermsgranted() {
+					if (parent.window.permissionsgranted != true) {
+						setTimeout(function() {
+							checkifpermsgranted()
+						}, 100)
+					} else {
+						switchmenu("appletlist")
+					}
 				}
-				while (parent.window.reponse != true)
+				checkifpermsgranted()
 			}
-		}, 2000)
+		}, 200)
 		document.querySelectorAll(".menu").forEach(function (menu) {
 			menu.style.display = "none"
 		})
