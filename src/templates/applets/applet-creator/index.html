@@ -1,78 +1,62 @@
 <head>
-	<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-	<script type="importmap">
-      {
-        "imports": {
-          "@material/web/": "https://esm.run/@material/web/"
-        }
-      }
-    </script>
-	<script type="module">
-		import '@material/web/all.js';
-		import { styles as typescaleStyles } from '@material/web/typography/md-typescale-styles.js';
-
-		document.adoptedStyleSheets.push(typescaleStyles.styleSheet);
-	</script>
+	<link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/fontawesome.min.css">
+    <script src="/static/js/bootstrap.bundle.js"></script>
+    <script src="/static/js/fontawesome.min.js"></script>
+    <script src="/static/js/jquery.min.js"></script>
 </head>
 
 <body>
-	<div style="position: absolute; top: 36%; left: 46%;" class="menu" id="appletlist">
-		<md-filled-button onclick="switchmenu('newapplet')">New Applet</md-filled-button>
+	<div class="h-75 d-flex justify-content-center align-items-center" id="appletlist">
+		<button type="button" class="btn btn-primary" onclick="switchmenu('newapplet')">New Applet</button>
 	</div>
-	<div style="position: absolute; top: 33%; left: 33%;" class="menu" id="waitperms">
-		<h1 class="md-typescale-display-medium">Waiting until permissions granted</h1>
+	<div class="h-75 d-flex justify-content-center align-items-center" id="waitperms">
+		<h1 class="md-typescale-display-medium">Waiting until permissions granted</h1>&nbsp;&nbsp;&nbsp;
+		<div class="spinner-border" role="status"></div>
 	</div>
-	<div class="menu" id="newapplet">
+	<div class="h-75 d-flex justify-content-center align-items-center" id="newapplet">
 		<form action="" id="newapplet-newappletform">
 			<h1 class="md-typescale-display-medium">New Applet</h1>
-			<md-outlined-text-field id="newapplet-softwarename" label="Software name" supporting-text="The name that will appear in the navigation bar above"></md-outlined-text-field>
 			<br>
+			<input id="newapplet-softwarename" placeholder="Software name" class="form-control"></md-outlined-text-field>
 			<br>
-			<md-filled-button onclick="switchmenu('createapplet'); startappletcreate()">Create</md-filled-button>
+			<button type="button" class="btn btn-primary" onclick="switchmenu('createapplet'); startappletcreate()">Create</button>
 		</form>
 	</div>
 
-	<div style="position: absolute; top: 30%; left: 42%;" class="menu" id="createapplet">
-		<h1 style="text-align: center; vertical-align: center;" class="md-typescale-display-medium" id="createapplet-heading"></h1>
-		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-		<md-circular-progress indeterminate></md-circular-progress>
+	<div class="h-75 d-flex justify-content-center align-items-center" id="createapplet">
+		<h1 class="d-block" id="createapplet-heading"></h1>&nbsp;&nbsp;&nbsp;
+		<div class="spinner-border" role="status"></div>
 	</div>
 
 	<script>
-		parent.requestpermissions(["command", "software"])
+		$(".h-75").removeClass("d-flex")
+		$(".h-75").addClass("d-none")
 		switchmenu("waitperms")
-		function checkifpermsgranted() {
-			if (parent.window.permissionsgranted != true) {
-				setTimeout(function() {
-					checkifpermsgranted()
-				}, 100)
-			} else {
-				switchmenu("appletlist")
-			}
-		}
-		checkifpermsgranted()
-		document.querySelectorAll(".menu").forEach(function (menu) {
-			menu.style.display = "none"
+		parent.requestpermissions(["command", "software"]).catch(function() {
+			alert("permissions denied, relaunch and grant permissions")
+			parent.quit()
+		}).then(function() {
+			switchmenu("appletlist")
 		})
-		document.getElementById("appletlist").style.display = "block"
 		function switchmenu(menu) {
-			document.querySelectorAll(".menu").forEach(function (menu) {
-				menu.style.display = "none"
-			})
-			document.getElementById(menu).style.display = "block"
+			$(".h-75").removeClass("d-flex")
+			$(".h-75").addClass("d-none")
+			$("#" + menu).removeClass("d-none")
+			$("#" + menu).addClass("d-flex")
 		}
-		document.getElementById("newapplet-newappletform").addEventListener("submit", function(e) {
-			e.preventDefault()
+		$("#newapplet-appletform").submit(function(e) {
+			e.preventDefault();
 		})
 		function startappletcreate() {
-			var heading = document.getElementById("createapplet-heading")
-			heading.textContent = "Generating applet files"
-			// createfile("index.html")
+			var heading = $("#createapplet-heading")
+			heading.text("Generating symlinks")
+			
 			setTimeout(function() {
-				heading.textContent = "Compressing applet"
+				heading.text("Compressing applet")
 			}, 2000)
 			setTimeout(function() {
-				heading.textContent = "Installing software"
+				heading.text("Installing software")
 			}, 4000)
 		}
 	</script>

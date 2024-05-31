@@ -24,9 +24,9 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
-                    onclick="window.permissionsgranted = false">Decline</button>
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal"
-                    onclick="grantpermissions()">Grant</button>
+                    onclick="window.permissionsgranted = false">Deny</button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="grantpermissionsbutton"
+                    onclick="window.permissionsgranted = true">Grant</button>
             </div>
         </div>
     </div>
@@ -45,12 +45,13 @@
             <div class="modal-body">
                 <h1 id="name" style="display: inline;"></h1>
                 <p id="version" style="display: inline;"></p>
+
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
                     onclick="window.permissionsgranted = false">Decline</button>
                 <button type="button" class="btn btn-primary" data-bs-dismiss="modal"
-                    onclick="grantpermissions()">Grant</button>
+                    onclick="window.permissionsgranted = true">Grant</button>
             </div>
         </div>
     </div>
@@ -63,6 +64,10 @@
 
 <script>
     var appletperms = JSON.parse(JSON.stringify("{% autoescape false %}{{ appletperms }}{% endautoescape %}"))
+
+    function quit() {
+        window.location.href = "/quit/{{ applettorender }}"
+    }
 
     function uploadfile(formid) {
         var response
@@ -177,36 +182,48 @@
             type: "POST",
             url: "/requestsoftwareinstall/{{ applettorender }}",
             data: { "path": path },
-            success: function(response) {
-                
+            success: function (response) {
+
             },
             dataType: "json"
         })
     }
 
     function requestpermissions(requestedperms) {
-        window.requestedperms = requestedperms
-        if (requestedperms.indexOf("command") >= 0 && appletperms.indexOf("command") == 0) {
-            $("#permissionlist").append('<li title="DANGEROUS PERMISSION: Allows software to run system commands">Run system commands</li>')
-        }
-        if (requestedperms.indexOf("software") >= 0 && appletperms.indexOf("software") == 0) {
-            $("#permissionlist").append('<li title="Allows the software to request Serverman to install another software from the local storage">Request software install</li>')
-        }
-        if ($("#permissionlist").is(":empty")) {
-            window.permissionsgranted = true
-        } else {
-            new bootstrap.Modal($("#permissionmodal")).show()
-        }
-        
-    }
-    function grantpermissions() {
-        window.permissionsgranted = true
-        console.log(window.requestedperms)
-        $.ajax({
-            type: "POST",
-            url: "/grantpermissions/{{ applettorender }}",
-            data: { "permissions": window.requestedperms.join(" ") },
-            dataType: "text"
+        return new Promise((resolve, reject) => {
+            window.requestedperms = requestedperms
+            if (requestedperms.indexOf("command") >= 0 && appletperms.indexOf("command") == -1) {
+                $("#permissionlist").append('<li title="DANGEROUS PERMISSION: Allows software to run system commands">Run system commands</li>')
+            }
+            if (requestedperms.indexOf("software") >= 0 && appletperms.indexOf("software") == -1) {
+                $("#permissionlist").append('<li title="Allows the software to request Serverman to install another software from the local storage">Request software install</li>')
+            }
+            if ($("#permissionlist").is(":empty")) {
+                window.permissionsgranted = true
+                return resolve(window.permissionsgranted)
+            } else {
+                new bootstrap.Modal($("#permissionmodal")).show()
+                function checkifpermsgranted() {
+                    if (window.permissionsgranted == undefined) {
+                        setTimeout(function () {
+                            checkifpermsgranted()
+                        }, 500)
+                    } else {
+                        if (window.permissionsgranted) {
+                            $.ajax({
+                                type: "POST",
+                                url: "/grantpermissions/{{ applettorender }}",
+                                data: { "permissions": window.requestedperms.join(" ") },
+                                dataType: "text"
+                            })
+                            return resolve()
+                        } else if (!window.permissionsgranted) {
+                            return reject()
+                        }
+                    }
+                }
+                checkifpermsgranted()
+            }
         })
     }
 </script>
